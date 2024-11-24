@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Contact Manager</title>
+  <link rel="stylesheet" href="/stylesheets/style.css">
+  <script src="/javascripts/jquery.js"></script>
+  <script src="/javascripts/handlebars.js"></script>
+  <script src="/javascripts/app.js" defer></script>
+</head>
+<body>
+  <header>
+    <h1>Contact Manager</h1>
+    <p id="subtitle">Using Backbone.js Localstorage, RequireJS, Handlebars and Boostrap</p>
+  </header>
+  <main></main>
+  <footer>
+    <p>Developed by Matin Hassan Pour // Software Engineering Student - Launch School</p>
+  </footer>
+  
+  <!-- Handlebars Templates -->
+  
+  <script id="new_contact_template" type="text/x-handlebars">
+    <div id="new_contact_wrapper">
+      <div id="form_title">
+        <p>Create Contact</p>
+      </div>
+      <form action="#" method="post">
+        <fieldset>
+          <dl>
+            <dt><label for="name">Full Name:</label></dt>
+            <dd>
+              <input type="text" name="name" id="name" pattern="w{\1,}" placeholder="John Doe" required>
+              <p class="error_message">Invalid Field</p>
+            </dd>
+            <dt><label for="email">Email Address:</label></dt>
+            <dd>
+              <input type="text" name="email" id="email" pattern="^\w+@\w+\.\w+$" placeholder="example@domain.com" required>
+              <p class="error_message">Invalid Field</p>
+            </dd>
+            <dt><label for="telephone">Telephone Number:</label></dt>
+            <dd>
+              <input type="text" name="telephone" id="telephone" pattern="\d{3}\s*\d{3}\s*\d{4}" placeholder="123 456 7890" required>
+              <p class="error_message">Invalid Field</p>
+            </dd>
+            {{>tag_partial}}
+          </dl>
+        </fieldset>
+        <div id="actions">
+          <a href="#" class="button submit">Submit</a>
+          <a href="#" class="button cancel">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </script>
+
+  <script id="home_template" type="text/x-handlebars">
+    {{>nav_partial}}
+    {{#if contacts.length}}
+      <div id="contacts_wrapper">
+        <ul>
+          {{#each contacts}}
+          <li>
+            <div class="contact" data-id="{{id}}">
+              <p class="contact_name">{{full_name}}</p>
+              <dl>
+                <dt>Phone Number:</dt>
+                <dd class="contact_number">{{phone_number}}</dd>
+                <dt>Email:</dt>
+                <dd class="contact_email">{{email}}</dd>
+              </dl>
+              <a href="#" class="button edit" data-id="{{id}}">Edit</a>
+              <a href="#" class="button delete" data-id="{{id}}">Delete</a>
+            </div>
+          </li>
+          {{/each}}
+        </ul>
+      </div>
+    {{else}}
+      {{>no_contact_partial}}
+    {{/if}}
+  </script>
+
+  <!-- Handlebars Partials -->
+
+  <script id="nav_partial" type="text/x-handlebars">
+    <nav>
+      <a href="#" class="button add_contact">Add Contact</a>
+      <label for="search"><input type="text" placeholder="Search" id="search"></label>
+    </nav>
+  </script>
+
+  <script id="no_contact_partial" type="text/x-handlebars">
+    <div id="no_contacts_wrapper">
+      <p>There is no contacts</p>
+      <a href="#" class="button add_contact">Add Contact</a>
+    </div>
+  </script>
+
+  <script id="tag_partial" type="text/x-handlebars">
+    <dt><label>Tags:</label></dt>
+    {{#each tags}}
+      <label class="tag" for="tag{{@index}}"><input type="checkbox" name="tag{{@index}}" value="{{this}}"> {{this}}</label>
+    {{/each}}
+    <label for="new_tag"><input type="text" name="new_tag" id="new_tag" placeholder="Add new tag"></label>
+  </script>
+
+</body>
+</html>

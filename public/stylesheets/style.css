@@ -1,0 +1,206 @@
+@import url('whitespace_reset.css');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: sans-serif;
+  color: #074c3c;
+}
+
+header {
+  width: 100%;
+  height: 150px;
+  background-color: #02ad85;
+}
+
+h1 {
+  text-align: center;
+  padding-top: 30px;
+  font-size: 2.5rem;
+  color: #fff;
+}
+
+#subtitle {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 1.25rem;
+  color: #8cfae0;
+}
+
+nav {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  width: 70%;
+  min-height: 100px;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 4px;
+  border: 1px solid #aad9ce;
+  background-color: #d6f9ed;
+}
+
+#search {
+  height: 35px;
+  width: 100%;
+  margin-top: 20px;
+  padding-left: 10px;
+  border-radius: 3px;
+  border: 1px solid #aad9ce;
+  font-size: 1rem;
+}
+
+input:focus {
+  outline: none;
+  border-color: #aad9ce;
+  box-shadow: 0 0 10px #aad9ce;
+}
+
+.button {
+  height: 35px;
+  width: 130px;
+  margin-top: 30px;
+  padding: 7px;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 5px;
+  border: 1px solid #aad9ce;
+  color: #0e876a;
+}
+
+.button:hover {
+  color: #d6f9ed;
+  background-color: #0e876a;
+}
+
+#contacts_wrapper ul {
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+  flex-wrap: wrap;
+  width: 70%;
+  margin: 50px auto 0 auto;
+  padding: 10px 20px;
+}
+
+.contact {
+  margin-right: 30px;
+}
+
+.contact dt {
+  margin-top: 10px;
+  font-weight: bold;
+  color: #344541;
+}
+
+a.edit, a.delete {
+  display: inline-block;
+  width: 80px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.contact_name {
+  font-size: 22px;
+  font-weight: bold;
+  color: #000;
+}
+
+#no_contacts_wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 70%;
+  min-height: 150px;
+  margin: 50px auto 0 auto;
+  border-radius: 4px;
+  border: 1px solid #aad9ce;
+  background-color: #d6f9ed;
+}
+
+#no_contacts p {
+  font-weight: bold;
+  font-size: 1.5rem;
+  color: #074c3c;
+}
+
+#new_contact_wrapper {
+  width: 70%;
+  min-height: 350px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#form_title {
+  margin: 50px auto 0 auto;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #aad9ce;
+}
+
+#form_title p {
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.9rem;
+  color: #074c3c;
+}
+
+fieldset {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 50px;
+}
+
+label {
+  display: inline-block;
+  width: 200px;
+  text-align: left;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+dl input[type="text"] {
+  height: 35px;
+  min-width: 400px;
+  padding-left: 10px;
+  font-size: 1rem;
+  border-radius: 3px;
+  border: 1px solid #aad9ce;
+}
+
+#actions {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+#actions a {
+  margin: 0 10px 10px 10px;
+}
+
+dl .tag {
+  display: block;
+}
+
+.error_message {
+  display: none;
+  color: red;
+}
+
+footer {
+  width: 70%;
+  margin: 50px auto 20px auto;
+  border-top: 1px solid #aad9ce;
+  padding-top: 10px;
+}
+
+footer p {
+  text-align: center;
+  font-size: 14px;
+  color: rgb(95, 95, 95);
+}
