@@ -1,22 +1,3 @@
-const contacts = [
-  {
-    "id": 1,
-    "full_name": "Arthur Dent",
-    "email": "dent@example.com",
-    "phone_number": "12345678901",
-    "tags": "work,business"
-  },
-  {
-    "id": 2,
-    "full_name": "George Smiley",
-    "email": "smiley@example.com",
-    "phone_number": "12345678901",
-    "tags": null
-  }
-];
-
-const tags = ['student', 'teacher', 'lead']
-
 document.addEventListener('DOMContentLoaded', () => {
   function registerPartials() {
     Handlebars.registerPartial('tag_partial', document.querySelector('#tag_partial').innerHTML);
@@ -31,30 +12,96 @@ document.addEventListener('DOMContentLoaded', () => {
         return obj;
       }, {});
   }
-  
-  const main = document.querySelector('main');
-  const templates = compileTemplates();
-  registerPartials();
 
-  main.innerHTML = templates.home_template({ contacts: contacts });
+  function renderNewContactPage() {
+    const tags = [...document.querySelectorAll('option')]
+      .map(option => option.textContent)
+      .slice(1);
+    main.innerHTML = templates.new_contact_template({ tags: tags });
+  }
 
-  main.addEventListener('click', e => {
-    console.log('click');
-    if (e.target.matches('.add_contact')) {
-      main.innerHTML = templates.new_contact_template({ tags: tags });
-    } else if (e.target.matches('.cancel')) {
-      main.innerHTML = templates.home_template({ contacts: contacts });
-    }
-  });
+  function handleInvalidFields(e) {
+    if (document.querySelector('form') === null) return;
 
-  main.addEventListener('focusout', e => {
     const input = e.target;
     const errorMsgElement = input.parentElement.querySelector('.error_message');
 
     if (input.validity.valueMissing || input.validity.patternMismatch) {
-      errorMsgElement.style.display = 'block';
+      errorMsgElement.classList.add('active');
     } else {
-      errorMsgElement.style.display = 'none';
+      errorMsgElement.classList.remove('active');
+    }
+  }
+
+  function handleFormErrors() {
+    document.querySelectorAll('input[type="text"]').forEach(input => {
+      if (input.id === 'new_tag') return;
+      handleInvalidFields({ target: input });
+    });
+
+    if (document.querySelectorAll('.active').length !== 0) {
+      alert('Please fix form errors before submitting!');
+    }
+  }
+
+  function handleFormSubmission() {
+    handleFormErrors();
+
+    // to be continued
+  }
+
+  async function fetchAllContacts() {
+    try {
+      const response = await fetch('http://localhost:3000/api/contacts');
+      const data = await response.json();
+
+      data.forEach(contact => {
+        contact.tags = contact.tags ? contact.tags.split(',') : [];
+      });
+
+      const tags = [...new Set(data.flatMap(({tags}) => tags))];
+
+      renderContacts(data);
+      renderTags(tags);
+
+    } catch (error) {
+
+      console.error('Error fetching contacts:', error);
+      return [];
+    }
+  }
+
+  function renderContacts(data) {
+    document.querySelector('main').innerHTML = templates.home_template({ contacts: data });
+  }
+
+  function renderTags(data) {
+    const tagsList = document.querySelector('#tags_list');
+
+    data.forEach(tag => {
+      let select = document.createElement('option');
+      select.value = tag;
+      select.textContent = tag;
+      tagsList.appendChild(select);
+    });
+  }
+
+  const main = document.querySelector('main');
+  const templates = compileTemplates();
+  let tags = [];
+
+  registerPartials();
+  fetchAllContacts();
+
+  main.addEventListener('focusout', handleInvalidFields);
+
+  main.addEventListener('click', e => {
+    if (e.target.matches('.add_contact')) {;
+      renderNewContactPage()
+    } else if (e.target.matches('.cancel')) {
+      main.innerHTML = fetchAllContacts();
+    } else if (e.target.matches('.submit')) {
+      handleFormSubmission();
     }
   });
 });
@@ -63,9 +110,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 TODOS:
 [ ] form submission
+[ ] design/show tags in contacts
 [ ] ajax when using search
+  - add focus to searchbar
+  - filter contact objects every input
 [ ] add options list to search by tag
-- :tag in search bar
+  - :tag in search bar
 
 [x] individual contact design
 [x] align search with button
