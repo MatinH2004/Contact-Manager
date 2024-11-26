@@ -123,6 +123,16 @@ a.edit, a.delete {
   color: #000;
 }
 
+.contact_tags {
+  display: inline-block;
+  margin-top: 3px;
+  padding: 3px;
+  font-weight: bold;
+  border-radius: 3px;
+  background-color: #02ad85;
+  color: white;
+}
+
 #no_contacts_wrapper {
   display: flex;
   flex-direction: column;
