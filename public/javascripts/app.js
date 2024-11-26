@@ -14,11 +14,27 @@ document.addEventListener('DOMContentLoaded', () => {
       }, {});
   }
 
+  function bindEvents() {
+    const main = document.querySelector('main');
+
+    main.addEventListener('focusout', handleInvalidFields);
+    main.addEventListener('click', e => {
+      if (e.target.matches('.add_contact')) {;
+        renderNewContactPage()
+      } else if (e.target.matches('.cancel')) {
+        main.innerHTML = fetchAllContacts();
+      } else if (e.target.matches('.submit')) {
+        handleFormSubmission();
+      }
+    });
+  }
+
   function renderNewContactPage() {
     const tags = [...document.querySelectorAll('option')]
       .map(option => option.textContent)
       .slice(1);
-    main.innerHTML = templates.new_contact_template({ tags: tags });
+    document.querySelector('main').innerHTML = 
+      templates.new_contact_template({ tags: tags });
   }
 
   function handleInvalidFields(e) {
@@ -73,7 +89,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderContacts(data) {
-    document.querySelector('main').innerHTML = templates.home_template({ contacts: data });
+    document.querySelector('main').innerHTML = 
+      templates.home_template({ contacts: data });
   }
 
   function renderTags(data) {
@@ -89,20 +106,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const main = document.querySelector('main');
   const templates = compileTemplates();
+
+  bindEvents();
   registerPartials();
   fetchAllContacts();
-
-  main.addEventListener('focusout', handleInvalidFields);
-
-  main.addEventListener('click', e => {
-    if (e.target.matches('.add_contact')) {;
-      renderNewContactPage()
-    } else if (e.target.matches('.cancel')) {
-      main.innerHTML = fetchAllContacts();
-    } else if (e.target.matches('.submit')) {
-      handleFormSubmission();
-    }
-  });
 });
 
 /*
