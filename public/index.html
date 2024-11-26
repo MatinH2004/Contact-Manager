@@ -70,6 +70,7 @@
                 <dd class="contact_number">{{phone_number}}</dd>
                 <dt>Email:</dt>
                 <dd class="contact_email">{{email}}</dd>
+                {{>contact_tags_partial}}
               </dl>
               <a href="#" class="button edit" data-id="{{id}}">Edit</a>
               <a href="#" class="button delete" data-id="{{id}}">Delete</a>
@@ -108,6 +109,15 @@
       <label class="tag" for="tag{{@index}}"><input type="checkbox" name="tag{{@index}}" value="{{this}}"> {{this}}</label>
     {{/each}}
     <label for="new_tag"><input type="text" name="new_tag" id="new_tag" placeholder="Add new tag"></label>
+  </script>
+
+  <script id="contact_tags_partial" type="text/x-handlebars">
+    {{#if tags.length}}
+      <dt>Tags:</dt>
+      {{#each tags}}
+        <span class="contact_tags">{{this}}</span>
+      {{/each}}
+    {{/if}}
   </script>
 
 </body>
