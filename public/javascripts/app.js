@@ -1,9 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
   function registerPartials() {
-    Handlebars.registerPartial('tag_partial', document.querySelector('#tag_partial').innerHTML);
-    Handlebars.registerPartial('contact_tags_partial', document.querySelector('#contact_tags_partial').innerHTML);
-    Handlebars.registerPartial('no_contact_partial', document.querySelector('#no_contact_partial').innerHTML);
     Handlebars.registerPartial('nav_partial', document.querySelector('#nav_partial').innerHTML);
+    Handlebars.registerPartial('tag_partial', document.querySelector('#tag_partial').innerHTML);
+    Handlebars.registerPartial('contact_partial', document.querySelector('#contact_partial').innerHTML);
+    Handlebars.registerPartial('no_contact_partial', document.querySelector('#no_contact_partial').innerHTML);
+    Handlebars.registerPartial('contact_tags_partial', document.querySelector('#contact_tags_partial').innerHTML);
   }
 
   function compileTemplates() {
