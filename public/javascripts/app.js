@@ -23,9 +23,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (e.target.matches('.add_contact')) {;
         renderNewContactPage()
       } else if (e.target.matches('.cancel')) {
-        main.innerHTML = fetchAllContacts();
+        renderHomePage();
       } else if (e.target.matches('.submit')) {
-        submitAddContactForm();
+        addContact();
+      } else if (e.target.matches('.delete')) {
+        deleteContact(e.target);
       }
     });
   }
@@ -67,7 +69,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function submitAddContactForm() {
+  function deleteContact(btn) {
+    const id = btn.closest('div').getAttribute('data-id');
+
+    if (confirm('Are you sure you want to delete this contact?')) {
+      fetch(`http://localhost:3000/api/contacts/${id}`, { 
+        method: 'delete',
+      });
+
+      renderHomePage();
+    }
+  }
+
+  function addContact() {
     if (containsFormErrors()) return;
 
     const request = new XMLHttpRequest();
@@ -150,17 +164,12 @@ document.addEventListener('DOMContentLoaded', () => {
 /*
 
 TODOS:
-[ ] form submission
-[ ] design/show tags in contacts
+[x] delete contacts
+
+[ ] edit contacts
+[ ] add search by tag functionality
 [ ] ajax when using search
   - add focus to searchbar
   - filter contact objects every input
-[ ] add search by tag functionality
-
-[x] individual contact design
-[x] align search with button
-
-NOT URGENT:
-[] 
 
 */ 
