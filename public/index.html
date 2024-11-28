@@ -32,18 +32,18 @@
           <dl>
             <dt><label for="name">Full Name:</label></dt>
             <dd>
-              <input type="text" name="name" id="name" pattern="\w{1,}" placeholder="John Doe" required>
-              <p class="error_message">Invalid Field</p>
+              <input type="text" name="name" id="name" pattern="^\w+\s?\w+$" placeholder="John Doe" required>
+              <p class="error_message">← Invalid Field</p>
             </dd>
             <dt><label for="email">Email Address:</label></dt>
             <dd>
               <input type="text" name="email" id="email" pattern="^\w+@\w+\.\w+$" placeholder="example@domain.com" required>
-              <p class="error_message">Invalid Field</p>
+              <p class="error_message">← Invalid Field</p>
             </dd>
             <dt><label for="telephone">Telephone Number:</label></dt>
             <dd>
               <input type="text" name="telephone" id="telephone" pattern="\d{3}\s*\d{3}\s*\d{4}" placeholder="123 456 7890" required>
-              <p class="error_message">Invalid Field</p>
+              <p class="error_message">← Invalid Field</p>
             </dd>
             {{>tag_partial}}
           </dl>
@@ -61,22 +61,7 @@
     {{#if contacts.length}}
       <div id="contacts_wrapper">
         <ul>
-          {{#each contacts}}
-          <li>
-            <div class="contact" data-id="{{id}}">
-              <p class="contact_name">{{full_name}}</p>
-              <dl>
-                <dt>Phone Number:</dt>
-                <dd class="contact_number">{{phone_number}}</dd>
-                <dt>Email:</dt>
-                <dd class="contact_email">{{email}}</dd>
-                {{>contact_tags_partial}}
-              </dl>
-              <a href="#" class="button edit" data-id="{{id}}">Edit</a>
-              <a href="#" class="button delete" data-id="{{id}}">Delete</a>
-            </div>
-          </li>
-          {{/each}}
+          {{>contact_partial}}
         </ul>
       </div>
     {{else}}
@@ -90,10 +75,29 @@
     <nav>
       <a href="#" class="button add_contact">Add Contact</a>
       <select name="tags_list" id="tags_list">
-        <option value="">Tags</option>
+        <option value="">Tags ↓</option>
       </select>
       <label for="search"><input type="text" placeholder="Search" id="search"></label>
     </nav>
+  </script>
+
+  <script id="contact_partial" type="text/x-handlebars">
+    {{#each contacts}}
+    <li>
+      <div class="contact" data-id="{{id}}">
+        <p class="contact_name">{{full_name}}</p>
+        <dl>
+          <dt>Phone Number:</dt>
+          <dd class="contact_number">{{phone_number}}</dd>
+          <dt>Email:</dt>
+          <dd class="contact_email">{{email}}</dd>
+          {{>contact_tags_partial}}
+        </dl>
+        <a href="#" class="button edit" data-id="{{id}}">Edit</a>
+        <a href="#" class="button delete" data-id="{{id}}">Delete</a>
+      </div>
+    </li>
+    {{/each}}
   </script>
 
   <script id="no_contact_partial" type="text/x-handlebars">
@@ -106,9 +110,9 @@
   <script id="tag_partial" type="text/x-handlebars">
     <dt><label>Tags:</label></dt>
     {{#each tags}}
-      <label class="tag" for="tag{{@index}}"><input type="checkbox" name="tag{{@index}}" value="{{this}}"> {{this}}</label>
+      <label class="tag" for="tag{{@index}}"><input type="checkbox" name="tag{{@index}}" value="{{this}}">{{this}}</label>
     {{/each}}
-    <label for="new_tag"><input type="text" name="new_tag" id="new_tag" placeholder="Add new tag"></label>
+    <label for="new_tag"><input type="text" name="new_tag" id="new_tag" placeholder="Add new tag" pattern="\w*"></label>
   </script>
 
   <script id="contact_tags_partial" type="text/x-handlebars">

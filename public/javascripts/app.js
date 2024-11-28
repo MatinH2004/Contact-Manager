@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
       } else if (e.target.matches('.cancel')) {
         main.innerHTML = fetchAllContacts();
       } else if (e.target.matches('.submit')) {
-        handleFormSubmission();
+        submitAddContactForm();
       }
     });
   }
@@ -39,36 +39,71 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function handleInvalidFields(e) {
-    if (document.querySelector('form') === null) return;
-
     const input = e.target;
-    const errorMsgElement = input.parentElement.querySelector('.error_message');
+    const errorMsg = input.parentElement.querySelector('.error_message');
 
-    if (input.validity.valueMissing || input.validity.patternMismatch) {
-      errorMsgElement.classList.add('active');
+    if (document.querySelector('form') === null || !errorMsg) return;
+
+    if (input.validity.patternMismatch) {
+      input.classList.add('error');
+      errorMsg.classList.add('error');
+    } else if (input.validity.valueMissing) {
+      input.classList.add('error');
+      errorMsg.classList.add('error');
     } else {
-      errorMsgElement.classList.remove('active');
+      input.classList.remove('error');
+      errorMsg.classList.remove('error');
     }
   }
 
-  function handleFormErrors() {
+  function containsFormErrors() {
     document.querySelectorAll('input[type="text"]').forEach(input => {
-      if (input.id === 'new_tag') return;
       handleInvalidFields({ target: input });
     });
 
-    if (document.querySelectorAll('.active').length !== 0) {
+    if (document.querySelectorAll('.error').length !== 0) {
       alert('Please fix form errors before submitting!');
+      return true;
     }
   }
 
-  function handleFormSubmission() {
-    handleFormErrors();
+  function submitAddContactForm() {
+    if (containsFormErrors()) return;
 
-    // to be continued
+    const request = new XMLHttpRequest();
+    request.open('POST', 'http://localhost:3000/api/contacts/');
+    request.setRequestHeader('Content-Type', 'application/json');
+
+    const data = new FormData(document.querySelector('form'));
+    const json = JSON.stringify({
+      full_name: data.get('name'),
+      email: data.get('email'),
+      phone_number: data.get('telephone'),
+      tags: getAllTags(),
+    });
+
+    request.addEventListener('load', () => {
+      if (request.status === 201) {
+        renderHomePage();
+        alert('Contact Saved Successfully!');
+      } else {
+        alert('Error 400: Could Not Save Contact');
+        console.error('Response:', request.responseText);
+      }
+    });
+
+    request.send(json);
   }
 
-  async function fetchAllContacts() {
+  function getAllTags() {
+    return [...document.querySelectorAll('input[type="checkbox"]:checked')].map(input => {
+      return input.closest('label').textContent;
+    }).concat(document.querySelector('#new_tag').value)
+      .filter(tag => tag && tag.trim().length > 0)
+      .join(',');
+  }
+
+  async function renderHomePage() {
     try {
       const response = await fetch('http://localhost:3000/api/contacts');
       const data = await response.json();
@@ -105,12 +140,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  const main = document.querySelector('main');
   const templates = compileTemplates();
 
   bindEvents();
   registerPartials();
-  fetchAllContacts();
+  renderHomePage();
 });
 
 /*
@@ -121,8 +155,7 @@ TODOS:
 [ ] ajax when using search
   - add focus to searchbar
   - filter contact objects every input
-[ ] add options list to search by tag
-  - :tag in search bar
+[ ] add search by tag functionality
 
 [x] individual contact design
 [x] align search with button
