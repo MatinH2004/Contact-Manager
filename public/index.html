@@ -42,7 +42,7 @@
             </dd>
             <dt><label for="telephone">Telephone Number:</label></dt>
             <dd>
-              <input type="text" name="telephone" id="telephone" pattern="\d{3}\s*\d{3}\s*\d{4}" placeholder="123 456 7890" required>
+              <input type="text" name="telephone" id="telephone" pattern="^\d{10,}$" placeholder="6042225555" required>
               <p class="error_message">← Invalid Field</p>
             </dd>
             {{>tag_partial}}
