@@ -20,24 +20,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     main.addEventListener('focusout', handleInvalidFields);
     main.addEventListener('click', e => {
-      if (e.target.matches('.add_contact')) {;
-        renderNewContactPage()
-      } else if (e.target.matches('.cancel')) {
+      const target = e.target;
+
+      if (target.matches('.add_contact')) {;
+        renderForm()
+      } else if (target.matches('.cancel')) {
         renderHomePage();
-      } else if (e.target.matches('.submit')) {
-        addContact();
-      } else if (e.target.matches('.delete')) {
-        deleteContact(e.target);
+      } else if (target.matches('.submit')) {
+        submitForm();
+      } else if (target.matches('.edit')) {
+        editContact(target);
+      } else if (target.matches('.delete')) {
+        deleteContact(target);
       }
     });
   }
 
-  function renderNewContactPage() {
-    const tags = [...document.querySelectorAll('option')]
-      .map(option => option.textContent)
-      .slice(1);
-    document.querySelector('main').innerHTML = 
-      templates.new_contact_template({ tags: tags });
+  function getAllTags() {
+    return [...document.querySelectorAll('input[type="checkbox"]:checked')].map(input => {
+      return input.closest('label').textContent;
+    }).concat(document.querySelector('#new_tag').value)
+      .filter(tag => tag && tag.trim().length > 0)
+      .join(',');
   }
 
   function handleInvalidFields(e) {
@@ -69,8 +73,85 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function deleteContact(btn) {
-    const id = btn.closest('div').getAttribute('data-id');
+  async function editContact(target) {
+    function updateSubmitBtn() {
+      const submitBtn = document.querySelector('.submit');
+      submitBtn.classList.remove('submit');
+
+      submitBtn.addEventListener('click', e => {
+        e.preventDefault();
+        submitForm(true, id);
+      });
+    }
+
+    if (!target.closest('div.contact')) {
+      console.error('Contact Element Not Found');
+      return;
+    }
+    
+    const id = target.closest('div.contact').getAttribute('data-id');
+
+    try {
+      const response = await fetch(`http://localhost:3000/api/contacts/${id}`);
+      const contact = await response.json();
+
+      renderForm();
+
+      document.querySelector('#form_title p').textContent = 'Edit Contact';
+      document.querySelector('input[name="name"]').value = contact.full_name;
+      document.querySelector('input[name="email"]').value = contact.email;
+      document.querySelector('input[name="telephone"]').value = contact.phone_number;
+
+      if (contact.tags) {
+        const tags = contact.tags.split(',');
+
+        document.querySelectorAll('input[type="checkbox"]').forEach(tag => {
+          if (tags.includes(tag.closest('label').textContent)) tag.checked = true;
+        });
+      }
+
+      updateSubmitBtn();
+    } catch (error) {
+      console.error('Error fetching contact:', error);
+    };
+  }
+
+  function submitForm(modifyContact = false, id = null) {
+    if (containsFormErrors()) return;
+
+    const data = new FormData(document.querySelector('form'));
+    const json = JSON.stringify({
+      full_name: data.get('name'),
+      email: data.get('email'),
+      phone_number: data.get('telephone'),
+      tags: getAllTags(),
+    });
+
+    modifyContact ? updateContact(json, id) : createContact(json);
+  }
+
+  async function createContact(json) {
+    await fetch('http://localhost:3000/api/contacts/', {
+      method: 'post',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: json,
+    }).then(() => renderHomePage());
+  }
+
+  async function updateContact(json, id) {
+    await fetch(`http://localhost:3000/api/contacts/${id}`, {
+      method: 'put',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: json,
+    }).then(() => renderHomePage())
+  }
+
+  function deleteContact(target) {
+    const id = target.closest('div').getAttribute('data-id');
 
     if (confirm('Are you sure you want to delete this contact?')) {
       fetch(`http://localhost:3000/api/contacts/${id}`, { 
@@ -81,40 +162,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function addContact() {
-    if (containsFormErrors()) return;
-
-    const request = new XMLHttpRequest();
-    request.open('POST', 'http://localhost:3000/api/contacts/');
-    request.setRequestHeader('Content-Type', 'application/json');
-
-    const data = new FormData(document.querySelector('form'));
-    const json = JSON.stringify({
-      full_name: data.get('name'),
-      email: data.get('email'),
-      phone_number: data.get('telephone'),
-      tags: getAllTags(),
-    });
-
-    request.addEventListener('load', () => {
-      if (request.status === 201) {
-        renderHomePage();
-        alert('Contact Saved Successfully!');
-      } else {
-        alert('Error 400: Could Not Save Contact');
-        console.error('Response:', request.responseText);
-      }
-    });
-
-    request.send(json);
-  }
-
-  function getAllTags() {
-    return [...document.querySelectorAll('input[type="checkbox"]:checked')].map(input => {
-      return input.closest('label').textContent;
-    }).concat(document.querySelector('#new_tag').value)
-      .filter(tag => tag && tag.trim().length > 0)
-      .join(',');
+  function renderForm() {
+    const tags = [...document.querySelectorAll('option')]
+      .map(option => option.textContent)
+      .slice(1);
+    document.querySelector('main').innerHTML = 
+      templates.new_contact_template({ tags: tags });
   }
 
   async function renderHomePage() {
@@ -132,9 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
       renderTags(tags);
 
     } catch (error) {
-
       console.error('Error fetching contacts:', error);
-      return [];
     }
   }
 
