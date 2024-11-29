@@ -32,12 +32,12 @@
           <dl>
             <dt><label for="name">Full Name:</label></dt>
             <dd>
-              <input type="text" name="name" id="name" pattern="^\w+\s?\w+$" placeholder="John Doe" required>
+              <input type="text" name="name" id="name" pattern="^[a-zA-Z\s]+$" placeholder="John Doe" required>
               <p class="error_message">← Invalid Field</p>
             </dd>
             <dt><label for="email">Email Address:</label></dt>
             <dd>
-              <input type="text" name="email" id="email" pattern="^\w+@\w+\.\w+$" placeholder="example@domain.com" required>
+              <input type="text" name="email" id="email" pattern="^[a-zA-Z0-9]+@[a-zA-Z]+\.[a-zA-Z]+$" placeholder="example@domain.com" required>
               <p class="error_message">← Invalid Field</p>
             </dd>
             <dt><label for="telephone">Telephone Number:</label></dt>
