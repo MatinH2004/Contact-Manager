@@ -11,7 +11,7 @@
     "full_name": "Victor Reyes",
     "email": "vpr@example.com",
     "phone_number": "09876543210",
-    "tags": "work,friend"
+    "tags": "work"
   },
   {
     "id": 3,
@@ -19,5 +19,40 @@
     "email": "ph@example.com",
     "phone_number": "54321098761",
     "tags": null
+  },
+  {
+    "full_name": "Jonathan Leung",
+    "phone_number": "6049882339",
+    "email": "jl@cnv.ca",
+    "tags": "friend,cnv",
+    "id": 5
+  },
+  {
+    "full_name": "John Cash",
+    "phone_number": "2423903944",
+    "email": "jc@gmali.com",
+    "tags": "singer",
+    "id": 6
+  },
+  {
+    "full_name": "Toma Axente",
+    "phone_number": "0933040393",
+    "email": "tomaxente@seaspan.ca",
+    "tags": "friend,bcit",
+    "id": 7
+  },
+  {
+    "full_name": "John Doe",
+    "phone_number": "2132489324",
+    "email": "jd@ls.ca",
+    "tags": "work,friend,bcit",
+    "id": 8
+  },
+  {
+    "full_name": "Luca Nadeau",
+    "phone_number": "77832813923",
+    "email": "lnaduea@cnv.ca",
+    "tags": "work,friend,cnv",
+    "id": 9
   }
 ]
