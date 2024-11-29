@@ -19,6 +19,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const main = document.querySelector('main');
 
     main.addEventListener('focusout', handleInvalidFields);
+    main.addEventListener('input', e => {
+      if (e.target.matches('#search')) fetchContactsBySearch();
+    });
     main.addEventListener('click', e => {
       const target = e.target;
 
@@ -34,14 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
         deleteContact(target);
       }
     });
-  }
-
-  function getAllTags() {
-    return [...document.querySelectorAll('input[type="checkbox"]:checked')].map(input => {
-      return input.closest('label').textContent;
-    }).concat(document.querySelector('#new_tag').value)
-      .filter(tag => tag && tag.trim().length > 0)
-      .join(',');
   }
 
   function handleInvalidFields(e) {
@@ -73,8 +68,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function getAllTags() {
+    return [...document.querySelectorAll('input[type="checkbox"]:checked')].map(input => {
+      return input.closest('label').textContent;
+    }).concat(document.querySelector('#new_tag').value)
+      .filter(tag => tag && tag.trim().length > 0)
+      .join(',');
+  }
+
   async function editContact(target) {
-    function updateSubmitBtn() {
+    const updateSubmitBtn = () => {
       const submitBtn = document.querySelector('.submit');
       submitBtn.classList.remove('submit');
 
@@ -162,6 +165,37 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  async function fetchAllContacts() {
+    try {
+      const response = await fetch('http://localhost:3000/api/contacts');
+      const data = await response.json();
+
+      data.forEach(contact => {
+        contact.tags = contact.tags ? contact.tags.split(',') : [];
+      });
+
+      return data;
+    } catch (error) {
+      console.error('Error fetching contacts:', error);
+    }
+  }
+
+  async function fetchContactsBySearch() {
+    const contacts = await fetchAllContacts();
+
+    let searchValue = document.querySelector('#search').value.toLowerCase();
+    let matches = contacts.filter(({ full_name }) => {
+      return full_name.toLowerCase().startsWith(searchValue);
+    });
+
+    if (searchValue.length === 0) {
+      matches = contacts;
+    }
+
+    document.querySelector('main #contacts_wrapper').innerHTML = 
+      templates.contacts_template({ contacts: matches, searchValue });
+  }
+
   function renderForm() {
     const tags = [...document.querySelectorAll('option')]
       .map(option => option.textContent)
@@ -171,22 +205,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function renderHomePage() {
-    try {
-      const response = await fetch('http://localhost:3000/api/contacts');
-      const data = await response.json();
+    const contacts = await fetchAllContacts();
+    const tags = [...new Set(contacts.flatMap(({ tags }) => tags))];
 
-      data.forEach(contact => {
-        contact.tags = contact.tags ? contact.tags.split(',') : [];
-      });
-
-      const tags = [...new Set(data.flatMap(({tags}) => tags))];
-
-      renderContacts(data);
-      renderTags(tags);
-
-    } catch (error) {
-      console.error('Error fetching contacts:', error);
-    }
+    renderContacts(contacts);
+    renderTags(tags);
   }
 
   function renderContacts(data) {
@@ -207,20 +230,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const templates = compileTemplates();
 
-  bindEvents();
   registerPartials();
   renderHomePage();
+  bindEvents();
 });
 
 /*
 
 TODOS:
 [x] delete contacts
+[x] edit contacts
+[x] ajax when using search
+- add focus to searchbar
+- filter contact objects every input
 
-[ ] edit contacts
 [ ] add search by tag functionality
-[ ] ajax when using search
-  - add focus to searchbar
-  - filter contact objects every input
+
+-- MAJOR REFACTOR:
+
+const App = {
+  init() {
+    this.templates = this.compileTemplates();
+    this.registerPartials();
+    this.renderHomePage();
+    this.bindEvents();
+  },
+
+  compileTemplates() {
+  
+  },
+
+  registerPartials() {
+  
+  },
+
+
+}
 
 */ 
