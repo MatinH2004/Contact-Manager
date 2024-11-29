@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function bindEvents() {
     const main = document.querySelector('main');
 
+    main.addEventListener('change', fetchContactsByTag);
     main.addEventListener('focusout', handleInvalidFields);
     main.addEventListener('input', e => {
       if (e.target.matches('#search')) fetchContactsBySearch();
@@ -196,6 +197,21 @@ document.addEventListener('DOMContentLoaded', () => {
       templates.contacts_template({ contacts: matches, searchValue });
   }
 
+  async function fetchContactsByTag(e) {
+    const contacts = await fetchAllContacts();
+
+    const selectElement = e.target;
+    const selectedIndex = selectElement.selectedIndex;
+    const selectedTag = selectElement.value;
+
+    let matches = contacts.filter(({ tags }) => tags.includes(selectedTag));
+
+    if (selectedIndex === 0) matches = contacts;
+
+    document.querySelector('main #contacts_wrapper').innerHTML =
+      templates.contacts_template({ contacts: matches });
+  }
+
   function renderForm() {
     const tags = [...document.querySelectorAll('option')]
       .map(option => option.textContent)
@@ -245,7 +261,8 @@ TODOS:
 - filter contact objects every input
 
 [ ] add search by tag functionality
-
+[ ] optimize fetching all contacts
+ 
 -- MAJOR REFACTOR:
 
 const App = {
