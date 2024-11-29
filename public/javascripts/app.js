@@ -105,7 +105,7 @@ const App = {
         'Content-Type': 'application/json',
       },
       body: json,
-    }).then(async () => await this.renderHomePage());
+    }).then(() => this.renderHomePage());
   },
 
   async updateContact(json, id) {
@@ -115,7 +115,7 @@ const App = {
         'Content-Type': 'application/json',
       },
       body: json,
-    }).then(async () => await this.renderHomePage());
+    }).then(() => this.renderHomePage());
   },
 
   async deleteContact(target) {
@@ -194,8 +194,9 @@ const App = {
     }
   },
 
-  async fetchContactsBySearch() {
-    let searchValue = document.querySelector('#search').value.toLowerCase();
+  fetchContactsBySearch() {
+    const searchValue = document.querySelector('#search').value.toLowerCase();
+    
     let matches = this.contacts.filter(({ full_name }) => {
       return full_name.toLowerCase().startsWith(searchValue);
     });
@@ -208,7 +209,7 @@ const App = {
       this.templates.contacts_template({ contacts: matches, searchValue });
   },
 
-  async fetchContactsByTag(event) {
+  fetchContactsByTag(event) {
     const selectElement = event.target;
     const selectedIndex = selectElement.selectedIndex;
     const selectedTag = selectElement.value;
