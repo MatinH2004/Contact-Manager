@@ -69,6 +69,19 @@
     {{/if}}
   </script>
 
+  <!-- make more efficient -->
+  <script id="contacts_template" type="text/x-handlebars">
+    {{#if contacts.length}}
+      <div id="contacts_wrapper">
+        <ul>
+          {{>contact_partial}}
+        </ul>
+      </div>
+    {{else}}
+      {{>no_contact_partial}}
+    {{/if}}
+  </script>
+
   <!-- Handlebars Partials -->
 
   <script id="nav_partial" type="text/x-handlebars">
@@ -102,7 +115,11 @@
 
   <script id="no_contact_partial" type="text/x-handlebars">
     <div id="no_contacts_wrapper">
-      <p>There is no contacts</p>
+      {{#if searchValue}}
+        <p>There is no contacts that start with {{searchValue}}</p>
+      {{else}}
+        <p>There's no contacts</p>
+      {{/if}}
       <a href="#" class="button add_contact">Add Contact</a>
     </div>
   </script>
