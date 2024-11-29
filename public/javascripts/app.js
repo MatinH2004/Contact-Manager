@@ -1,7 +1,6 @@
 const App = {
   init() {
     this.templates = this.compileTemplates();
-
     this.registerPartials();
     this.renderHomePage()
     this.bindEvents();
@@ -196,15 +195,13 @@ const App = {
   },
 
   async fetchContactsBySearch() {
-    const contacts = await this.fetchAllContacts();
-
     let searchValue = document.querySelector('#search').value.toLowerCase();
-    let matches = contacts.filter(({ full_name }) => {
+    let matches = this.contacts.filter(({ full_name }) => {
       return full_name.toLowerCase().startsWith(searchValue);
     });
 
     if (searchValue.length === 0) {
-      matches = contacts;
+      matches = this.contacts;
     }
 
     document.querySelector('main #contacts_wrapper').innerHTML = 
@@ -212,25 +209,23 @@ const App = {
   },
 
   async fetchContactsByTag(event) {
-    const contacts = await this.fetchAllContacts();
-
     const selectElement = event.target;
     const selectedIndex = selectElement.selectedIndex;
     const selectedTag = selectElement.value;
 
-    let matches = contacts.filter(({ tags }) => tags.includes(selectedTag));
+    let matches = this.contacts.filter(({ tags }) => tags.includes(selectedTag));
 
-    if (selectedIndex === 0) matches = contacts;
+    if (selectedIndex === 0) matches = this.contacts;
 
     document.querySelector('main #contacts_wrapper').innerHTML =
       this.templates.contacts_template({ contacts: matches });
   },
 
   async renderHomePage() {
-    const contacts = await this.fetchAllContacts();
-    const tags = [...new Set(contacts.flatMap(({ tags }) => tags))];
+    this.contacts = await this.fetchAllContacts();
+    const tags = [...new Set(this.contacts.flatMap(({ tags }) => tags))];
 
-    this.renderContacts(contacts);
+    this.renderContacts(this.contacts);
     this.renderTags(tags);
   },
 
