@@ -102,7 +102,7 @@ const App = {
     await fetch('http://localhost:3000/api/contacts/', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json; charset=utf-8',
       },
       body: json,
     }).then(() => this.renderHomePage());
@@ -112,7 +112,7 @@ const App = {
     await fetch(`http://localhost:3000/api/contacts/${id}`, {
       method: 'PUT',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json; charset=utf-8',
       },
       body: json,
     }).then(() => this.renderHomePage());
@@ -196,7 +196,7 @@ const App = {
 
   fetchContactsBySearch() {
     const searchValue = document.querySelector('#search').value.toLowerCase();
-    
+
     let matches = this.contacts.filter(({ full_name }) => {
       return full_name.toLowerCase().startsWith(searchValue);
     });
