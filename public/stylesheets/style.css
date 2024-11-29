@@ -107,8 +107,8 @@ input:focus {
 }
 
 .contact dl {
-  max-height: 100px;
-  overflow: scroll;
+  max-height: 90px;
+  overflow: auto;
 }
 
 .contact dt {
