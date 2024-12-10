@@ -1,22 +1,98 @@
+class BackendService {
+  constructor(baseURL) {
+    this.baseURL = baseURL;
+  }
+
+  async fetchAllContacts() {
+    try {
+      const response = await fetch(`${this.baseURL}/contacts`);
+      const data = await response.json();
+      data.forEach(contact => {
+        contact.tags = contact.tags ? contact.tags.split(',') : [];
+      });
+      return data;
+    } catch (error) {
+      console.error('Error fetching contacts:', error);
+    }
+  }
+
+  async createContact(json) {
+    return await fetch(`${this.baseURL}/contacts`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json; charset=utf-8' },
+      body: json,
+    });
+  }
+
+  async updateContact(json, id) {
+    return await fetch(`${this.baseURL}/contacts/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json; charset=utf-8' },
+      body: json,
+    });
+  }
+
+  async deleteContact(id) {
+    return await fetch(`${this.baseURL}/contacts/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async fetchContactById(id) {
+    try {
+      const response = await fetch(`${this.baseURL}/contacts/${id}`);
+      return await response.json();
+    } catch (error) {
+      console.error(`Failed to fetch contact with ID: ${id}`, error);
+    }
+  }
+}
+
 const App = {
   init() {
+    this.backend = new BackendService('http://localhost:3000/api');
     this.templates = this.compileTemplates();
     this.registerPartials();
-    this.renderHomePage()
+    this.renderHomePage();
     this.bindEvents();
   },
 
   compileTemplates() {
-    return [...document.querySelectorAll('script[id$="template"]')]
-      .reduce((obj, template) => {
-        obj[template.id] = Handlebars.compile(template.innerHTML);;
-        return obj;
-      }, {});
+    return [...document.querySelectorAll('script[id$="template"]')].reduce((obj, template) => {
+      obj[template.id] = Handlebars.compile(template.innerHTML);
+      return obj;
+    }, {});
   },
 
   registerPartials() {
     document.querySelectorAll('script[id$="partial"]').forEach(partial => {
       Handlebars.registerPartial(partial.id, partial.innerHTML);
+    });
+  },
+
+  async renderHomePage() {
+    this.contacts = await this.backend.fetchAllContacts();
+    const tags = [...new Set(this.contacts.flatMap(({ tags }) => tags))];
+    this.renderContacts(this.contacts);
+    this.renderTags(tags);
+  },
+
+  renderForm() {
+    const tags = [...document.querySelectorAll('option')].map(option => option.textContent).slice(1);
+    document.querySelector('main').innerHTML = this.templates.new_contact_template({ tags: tags });
+  },
+
+  renderContacts(data) {
+    document.querySelector('main').innerHTML = this.templates.home_template({ contacts: data });
+  },
+
+  renderTags(data) {
+    const tagsList = document.querySelector('#tags_list');
+    data.forEach(tag => {
+      const option = document.createElement('option');
+      option.value = tag;
+      option.textContent = tag;
+      tagsList.appendChild(option);
     });
   },
 
@@ -30,18 +106,14 @@ const App = {
     };
 
     document.addEventListener('focusout', this.handleInvalidFields);
-
     document.addEventListener('change', e => {
       if (e.target.matches('#tags_list')) this.fetchContactsByTag(e);
     });
-
     document.addEventListener('input', e => {
       if (e.target.matches('#search')) this.fetchContactsBySearch();
     });
-
     document.addEventListener('click', e => {
       const target = e.target;
-
       for (const selector in clickHandlers) {
         if (target.matches(selector)) {
           clickHandlers[selector](target);
@@ -54,11 +126,9 @@ const App = {
   handleInvalidFields(event) {
     const input = event.target;
     const errorMsg = input.parentElement.querySelector('.error_message');
-
-    if (document.querySelector('form') === null || !errorMsg) return;
+    if (!errorMsg || document.querySelector('form') === null) return;
 
     const hasError = input.validity.patternMismatch || input.validity.valueMissing;
-
     input.classList.toggle('error', hasError);
     errorMsg.classList.toggle('error', hasError);
   },
@@ -72,19 +142,10 @@ const App = {
       alert('Please fix form errors before submitting!');
       return true;
     }
-
     return false;
   },
 
-  getAllTags() {
-    return [...document.querySelectorAll('input[type="checkbox"]:checked')].map(input => {
-      return input.closest('label').textContent;
-    }).concat(document.querySelector('#new_tag').value)
-      .filter(tag => tag && tag.trim().length > 0)
-      .join(',');
-  },
-
-  submitForm(modifyContact = false, id = null) {
+  async submitForm(modifyContact = false, id = null) {
     if (this.containsFormErrors()) return;
 
     const data = new FormData(document.querySelector('form'));
@@ -95,165 +156,67 @@ const App = {
       tags: this.getAllTags(),
     });
 
-    modifyContact ? this.updateContact(json, id) : this.createContact(json);
+    if (modifyContact) {
+      await this.backend.updateContact(json, id);
+    } else {
+      await this.backend.createContact(json);
+    }
+    this.renderHomePage();
   },
 
-  async createContact(json) {
-    await fetch('http://localhost:3000/api/contacts/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json; charset=utf-8',
-      },
-      body: json,
-    }).then(() => this.renderHomePage());
-  },
+  async editContact(target) {
+    const id = target.closest('div.contact')?.getAttribute('data-id');
+    const contact = await this.backend.fetchContactById(id);
 
-  async updateContact(json, id) {
-    await fetch(`http://localhost:3000/api/contacts/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json; charset=utf-8',
-      },
-      body: json,
-    }).then(() => this.renderHomePage());
+    this.renderForm();
+    document.querySelector('#form_title p').textContent = 'Edit Contact';
+    document.querySelector('input[name="name"]').value = contact.full_name;
+    document.querySelector('input[name="email"]').value = contact.email;
+    document.querySelector('input[name="telephone"]').value = contact.phone_number;
+
+    if (contact.tags) {
+      const tags = contact.tags.split(',');
+      document.querySelectorAll('input[type="checkbox"]').forEach(tag => {
+        tag.checked = tags.includes(tag.closest('label').textContent);
+      });
+    }
+
+    const submitButton = document.querySelector('.submit');
+    submitButton.classList.remove('submit');
+    submitButton.addEventListener('click', e => {
+      e.preventDefault();
+      this.submitForm(true, id);
+    });
   },
 
   async deleteContact(target) {
     const id = target.closest('div').getAttribute('data-id');
-
     if (confirm('Are you sure you want to delete this contact?')) {
-      try {
-        const response = await fetch(`http://localhost:3000/api/contacts/${id}`, { 
-          method: 'DELETE',
-        });
-
-        if (!response.ok) throw new Error('Failed to delete contact.');
-
-        await this.renderHomePage();
-      } catch (error) {
-        console.error(error);
-      }
-    }
-  },
-
-  async editContact(target) {
-    const getContactId = () => target.closest('div.contact')?.getAttribute('data-id');
-
-    const setFormFields = (contact) => {
-      document.querySelector('#form_title p').textContent = 'Edit Contact';
-      document.querySelector('input[name="name"]').value = contact.full_name;
-      document.querySelector('input[name="email"]').value = contact.email;
-      document.querySelector('input[name="telephone"]').value = contact.phone_number;
-
-      if (contact.tags) {
-        const tags = contact.tags.split(',');
-
-        document.querySelectorAll('input[type="checkbox"]').forEach(tag => {
-          tag.checked = tags.includes(tag.closest('label').textContent);
-        });
-      }
-    }
-
-    const updateSubmitButton = () => {
-      const submitBtn = document.querySelector('.submit');
-      submitBtn.classList.remove('submit');
-      submitBtn.addEventListener('click', e => {
-        e.preventDefault();
-        this.submitForm(true, id);
-      });
-    }
-
-    const id = getContactId();
-
-    try {
-      const response = await fetch(`http://localhost:3000/api/contacts/${id}`);
-      if (!response.ok) throw new Error(`Failed to fetch contact with ID: ${id}`);
-
-      const contact = await response.json();
-
-      this.renderForm();
-      setFormFields(contact);
-      updateSubmitButton(id);
-    } catch (error) {
-      console.error(error);
-    }
-  },
-
-  async fetchAllContacts() {
-    try {
-      const response = await fetch('http://localhost:3000/api/contacts');
-      const data = await response.json();
-
-      data.forEach(contact => {
-        contact.tags = contact.tags ? contact.tags.split(',') : [];
-      });
-
-      return data;
-    } catch (error) {
-      console.error('Error fetching contacts:', error);
+      await this.backend.deleteContact(id);
+      this.renderHomePage();
     }
   },
 
   fetchContactsBySearch() {
     const searchValue = document.querySelector('#search').value.toLowerCase();
-
-    let matches = this.contacts.filter(({ full_name }) => {
-      return full_name.toLowerCase().startsWith(searchValue);
-    });
-
-    if (searchValue.length === 0) {
-      matches = this.contacts;
-    }
-
-    document.querySelector('main #contacts_wrapper').innerHTML = 
-      this.templates.contacts_template({ contacts: matches, searchValue });
+    const matches = this.contacts.filter(({ full_name }) => full_name.toLowerCase().startsWith(searchValue));
+    document.querySelector('main #contacts_wrapper').innerHTML =
+      this.templates.contacts_template({ contacts: searchValue ? matches : this.contacts, searchValue });
   },
 
   fetchContactsByTag(event) {
-    const selectElement = event.target;
-    const selectedIndex = selectElement.selectedIndex;
-    const selectedTag = selectElement.value;
-
-    let matches = this.contacts.filter(({ tags }) => tags.includes(selectedTag));
-
-    if (selectedIndex === 0) matches = this.contacts;
-
+    const selectedTag = event.target.value;
+    const matches = this.contacts.filter(({ tags }) => tags.includes(selectedTag));
     document.querySelector('main #contacts_wrapper').innerHTML =
-      this.templates.contacts_template({ contacts: matches });
+      this.templates.contacts_template({ contacts: matches.length > 0 ? matches : this.contacts });
   },
 
-  async renderHomePage() {
-    this.contacts = await this.fetchAllContacts();
-    const tags = [...new Set(this.contacts.flatMap(({ tags }) => tags))];
-
-    this.renderContacts(this.contacts);
-    this.renderTags(tags);
-  },
-
-  renderForm() {
-    const tags = [...document.querySelectorAll('option')]
-      .map(option => option.textContent)
-      .slice(1);
-
-    document.querySelector('main').innerHTML = 
-      this.templates.new_contact_template({ tags: tags });
-  },
-
-  renderContacts(data) {
-    document.querySelector('main').innerHTML = 
-      this.templates.home_template({ contacts: data });
-  },
-
-  renderTags(data) {
-    const tagsList = document.querySelector('#tags_list');
-
-    data.forEach(tag => {
-      let select = document.createElement('option');
-      select.value = tag;
-      select.textContent = tag;
-      tagsList.appendChild(select);
-    });
-  },
-}
+  getAllTags() {
+    return [...document.querySelectorAll('input[type="checkbox"]:checked')].map(input => input.closest('label').textContent)
+      .concat(document.querySelector('#new_tag').value)
+      .filter(tag => tag.trim().length > 0)
+      .join(',');
+  }
+};
 
 document.addEventListener('DOMContentLoaded', App.init.bind(App));

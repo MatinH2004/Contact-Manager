@@ -28,13 +28,6 @@
     "id": 5
   },
   {
-    "full_name": "John Cash",
-    "phone_number": "2423903944",
-    "email": "jc@gmali.com",
-    "tags": "singer",
-    "id": 6
-  },
-  {
     "full_name": "Toma Axente",
     "phone_number": "0933040393",
     "email": "tomaxente@seaspan.ca",
@@ -54,5 +47,12 @@
     "email": "lnaduea@cnv.ca",
     "tags": "work,friend,cnv",
     "id": 9
+  },
+  {
+    "full_name": "Sadra Khorvash",
+    "phone_number": "6041231235",
+    "email": "sadra@khorvash.com",
+    "tags": "friend,sfu,founder",
+    "id": 10
   }
 ]
